@@ -33,6 +33,7 @@ dependencies:
     sdk: flutter
   google_maps_flutter: ^2.5.3
   location: ^5.0.3
+  shared_preferences: ^2.2.2
 
 dev_dependencies:
   flutter_lints: ^2.0.0

@@ -14,17 +14,23 @@ class _GoogleMapViewState extends State<GoogleMapView> {
   late CameraPosition initalCameraPoistion;
 
   late LocationService locationService;
+
+  late GoogleMapController googleMapController;
   @override
   void initState() {
     initalCameraPoistion = const CameraPosition(target: LatLng(0, 0));
     locationService = LocationService();
-    updateCurrentLocation();
+
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return GoogleMap(
+      onMapCreated: (controller) {
+        googleMapController = controller;
+        updateCurrentLocation();
+      },
       zoomControlsEnabled: false,
       initialCameraPosition: initalCameraPoistion,
     );
@@ -33,6 +39,13 @@ class _GoogleMapViewState extends State<GoogleMapView> {
   void updateCurrentLocation() async {
     try {
       var locationData = await locationService.getLocation();
+
+      CameraPosition myCurrentCameraPoistion = CameraPosition(
+        target: LatLng(locationData.latitude!, locationData.longitude!),
+        zoom: 16,
+      );
+      googleMapController.animateCamera(
+          CameraUpdate.newCameraPosition(myCurrentCameraPoistion));
     } on LocationServiceException catch (e) {
       // TODO:
     } on LocationPermissionException catch (e) {

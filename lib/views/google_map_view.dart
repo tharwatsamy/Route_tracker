@@ -13,10 +13,12 @@ class GoogleMapView extends StatefulWidget {
 class _GoogleMapViewState extends State<GoogleMapView> {
   late CameraPosition initalCameraPoistion;
 
+  late LocationService locationService;
   @override
   void initState() {
     initalCameraPoistion = const CameraPosition(target: LatLng(0, 0));
-
+    locationService = LocationService();
+    updateCurrentLocation();
     super.initState();
   }
 
@@ -26,5 +28,17 @@ class _GoogleMapViewState extends State<GoogleMapView> {
       zoomControlsEnabled: false,
       initialCameraPosition: initalCameraPoistion,
     );
+  }
+
+  void updateCurrentLocation() async {
+    try {
+      var locationData = await locationService.getLocation();
+    } on LocationServiceException catch (e) {
+      // TODO:
+    } on LocationPermissionException catch (e) {
+      // TODO :
+    } catch (e) {
+      // TODO:
+    }
   }
 }

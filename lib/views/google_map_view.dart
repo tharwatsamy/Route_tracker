@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
+import 'package:route_tracker/utils/google_maps_place_service.dart';
 import 'package:route_tracker/utils/location_service.dart';
 
 import '../widgets/custom_text_field.dart';
@@ -14,20 +15,28 @@ class GoogleMapView extends StatefulWidget {
 
 class _GoogleMapViewState extends State<GoogleMapView> {
   late CameraPosition initalCameraPoistion;
-
+  late GoogleMapsPlacesService googleMapsPlacesService;
   late LocationService locationService;
   late TextEditingController textEditingController;
   late GoogleMapController googleMapController;
   Set<Marker> markers = {};
   @override
   void initState() {
+    googleMapsPlacesService = GoogleMapsPlacesService();
     textEditingController = TextEditingController();
     initalCameraPoistion = const CameraPosition(target: LatLng(0, 0));
     locationService = LocationService();
-    textEditingController.addListener(() {
-      print(textEditingController.text);
-    });
+    fetchPredictions();
     super.initState();
+  }
+
+  void fetchPredictions() {
+    textEditingController.addListener(() async {
+      if (textEditingController.text.isNotEmpty) {
+        var result = await googleMapsPlacesService.getPredictions(
+            input: textEditingController.text);
+      }
+    });
   }
 
   @override

@@ -16,15 +16,24 @@ class _GoogleMapViewState extends State<GoogleMapView> {
   late CameraPosition initalCameraPoistion;
 
   late LocationService locationService;
-
+  late TextEditingController textEditingController;
   late GoogleMapController googleMapController;
   Set<Marker> markers = {};
   @override
   void initState() {
+    textEditingController = TextEditingController();
     initalCameraPoistion = const CameraPosition(target: LatLng(0, 0));
     locationService = LocationService();
-
+    textEditingController.addListener(() {
+      print(textEditingController.text);
+    });
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    textEditingController.dispose();
+    super.dispose();
   }
 
   @override
@@ -40,8 +49,14 @@ class _GoogleMapViewState extends State<GoogleMapView> {
           zoomControlsEnabled: false,
           initialCameraPosition: initalCameraPoistion,
         ),
-        const Positioned(
-            top: 16, left: 16, right: 16, child: CustomTextField()),
+        Positioned(
+          top: 16,
+          left: 16,
+          right: 16,
+          child: CustomTextField(
+            textEditingController: textEditingController,
+          ),
+        ),
       ],
     );
   }

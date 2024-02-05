@@ -8,7 +8,7 @@ class CustomListView extends StatelessWidget {
     required this.places,
   });
 
-  final List<PlaceAutocompleteModel> places;
+  final List<PlaceModel> places;
 
   @override
   Widget build(BuildContext context) {

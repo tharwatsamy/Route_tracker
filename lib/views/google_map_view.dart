@@ -4,6 +4,7 @@ import 'package:location/location.dart';
 import 'package:route_tracker/models/place_autocomplete_model/place_autocomplete_model.dart';
 import 'package:route_tracker/utils/google_maps_place_service.dart';
 import 'package:route_tracker/utils/location_service.dart';
+import 'package:route_tracker/widgets/custom_list_view.dart';
 
 import '../widgets/custom_text_field.dart';
 
@@ -42,6 +43,8 @@ class _GoogleMapViewState extends State<GoogleMapView> {
         places.clear();
         places.addAll(result);
         setState(() {});
+      } else {
+        places.clear();
       }
     });
   }
@@ -73,6 +76,9 @@ class _GoogleMapViewState extends State<GoogleMapView> {
             children: [
               CustomTextField(
                 textEditingController: textEditingController,
+              ),
+              const SizedBox(
+                height: 16,
               ),
               CustomListView(places: places)
             ],
@@ -111,28 +117,6 @@ class _GoogleMapViewState extends State<GoogleMapView> {
   }
 }
 
-class CustomListView extends StatelessWidget {
-  const CustomListView({
-    super.key,
-    required this.places,
-  });
-
-  final List<PlaceAutocompleteModel> places;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView.separated(
-      shrinkWrap: true,
-      itemBuilder: (context, index) {
-        return Text(places[index].description!);
-      },
-      separatorBuilder: (context, index) {
-        return const Divider();
-      },
-      itemCount: places.length,
-    );
-  }
-}
 
 
 // text field

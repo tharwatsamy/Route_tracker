@@ -117,8 +117,6 @@ class _GoogleMapViewState extends State<GoogleMapView> {
   }
 }
 
-
-
 // text field
 // listen to the text field
 // make request each time input changes (google maps plcaes api)

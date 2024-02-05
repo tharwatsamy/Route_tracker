@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
+import 'package:route_tracker/models/place_autocomplete_model/place_autocomplete_model.dart';
 import 'package:route_tracker/utils/google_maps_place_service.dart';
 import 'package:route_tracker/utils/location_service.dart';
 
@@ -20,6 +21,8 @@ class _GoogleMapViewState extends State<GoogleMapView> {
   late TextEditingController textEditingController;
   late GoogleMapController googleMapController;
   Set<Marker> markers = {};
+
+  List<PlaceAutocompleteModel> places = [];
   @override
   void initState() {
     googleMapsPlacesService = GoogleMapsPlacesService();
@@ -35,6 +38,10 @@ class _GoogleMapViewState extends State<GoogleMapView> {
       if (textEditingController.text.isNotEmpty) {
         var result = await googleMapsPlacesService.getPredictions(
             input: textEditingController.text);
+
+        places.clear();
+        places.addAll(result);
+        setState(() {});
       }
     });
   }
@@ -62,8 +69,13 @@ class _GoogleMapViewState extends State<GoogleMapView> {
           top: 16,
           left: 16,
           right: 16,
-          child: CustomTextField(
-            textEditingController: textEditingController,
+          child: Column(
+            children: [
+              CustomTextField(
+                textEditingController: textEditingController,
+              ),
+              CustomListView(places: places)
+            ],
           ),
         ),
       ],
@@ -96,6 +108,29 @@ class _GoogleMapViewState extends State<GoogleMapView> {
     } catch (e) {
       // TODO:
     }
+  }
+}
+
+class CustomListView extends StatelessWidget {
+  const CustomListView({
+    super.key,
+    required this.places,
+  });
+
+  final List<PlaceAutocompleteModel> places;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      shrinkWrap: true,
+      itemBuilder: (context, index) {
+        return Text(places[index].description!);
+      },
+      separatorBuilder: (context, index) {
+        return const Divider();
+      },
+      itemCount: places.length,
+    );
   }
 }
 

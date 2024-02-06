@@ -1,6 +1,6 @@
 class Photo {
   int? height;
-  List<String>? htmlAttributions;
+  List<dynamic>? htmlAttributions;
   String? photoReference;
   int? width;
 
@@ -13,7 +13,7 @@ class Photo {
 
   factory Photo.fromJson(Map<String, dynamic> json) => Photo(
         height: json['height'] as int?,
-        htmlAttributions: json['html_attributions'] as List<String>?,
+        htmlAttributions: json['html_attributions'] as List<dynamic>?,
         photoReference: json['photo_reference'] as String?,
         width: json['width'] as int?,
       );

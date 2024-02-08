@@ -45,6 +45,7 @@ class _GoogleMapViewState extends State<GoogleMapView> {
         setState(() {});
       } else {
         places.clear();
+        setState(() {});
       }
     });
   }
@@ -81,6 +82,12 @@ class _GoogleMapViewState extends State<GoogleMapView> {
                 height: 16,
               ),
               CustomListView(
+                onPlaceSelect: (placeDetailsModel) {
+                  textEditingController.clear();
+                  places.clear();
+
+                  setState(() {});
+                },
                 places: places,
                 googleMapsPlacesService: googleMapsPlacesService,
               )
@@ -124,3 +131,4 @@ class _GoogleMapViewState extends State<GoogleMapView> {
 // listen to the text field
 // make request each time input changes (google maps plcaes api)
 // display list of results (places )
+

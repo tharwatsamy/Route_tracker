@@ -5,6 +5,7 @@ import 'package:route_tracker/models/place_autocomplete_model/place_autocomplete
 import 'package:route_tracker/utils/google_maps_place_service.dart';
 import 'package:route_tracker/utils/location_service.dart';
 import 'package:route_tracker/widgets/custom_list_view.dart';
+import 'package:uuid/uuid.dart';
 
 import '../widgets/custom_text_field.dart';
 
@@ -21,11 +22,14 @@ class _GoogleMapViewState extends State<GoogleMapView> {
   late LocationService locationService;
   late TextEditingController textEditingController;
   late GoogleMapController googleMapController;
+
+  late Uuid uuid;
   Set<Marker> markers = {};
 
   List<PlaceModel> places = [];
   @override
   void initState() {
+    uuid = const Uuid();
     googleMapsPlacesService = GoogleMapsPlacesService();
     textEditingController = TextEditingController();
     initalCameraPoistion = const CameraPosition(target: LatLng(0, 0));
@@ -36,9 +40,10 @@ class _GoogleMapViewState extends State<GoogleMapView> {
 
   void fetchPredictions() {
     textEditingController.addListener(() async {
+      var sesstionToken = uuid.v4();
       if (textEditingController.text.isNotEmpty) {
         var result = await googleMapsPlacesService.getPredictions(
-            input: textEditingController.text);
+            sesstionToken: sesstionToken, input: textEditingController.text);
 
         places.clear();
         places.addAll(result);

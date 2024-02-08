@@ -7,9 +7,10 @@ import 'package:route_tracker/models/place_details_model/place_details_model.dar
 class GoogleMapsPlacesService {
   final String baseUrl = 'https://maps.googleapis.com/maps/api/place';
   final String apiKey = 'AIzaSyC87Tt3tfO6aYids0BZStXXbrdAy05jQCI';
-  Future<List<PlaceModel>> getPredictions({required String input}) async {
-    var response = await http
-        .get(Uri.parse('$baseUrl/autocomplete/json?key=$apiKey&input=$input'));
+  Future<List<PlaceModel>> getPredictions(
+      {required String input, required String sesstionToken}) async {
+    var response = await http.get(Uri.parse(
+        '$baseUrl/autocomplete/json?key=$apiKey&input=$input&sessiontoken=$sesstionToken'));
 
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body)['predictions'];

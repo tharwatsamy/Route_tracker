@@ -22,7 +22,7 @@ class _GoogleMapViewState extends State<GoogleMapView> {
   late LocationService locationService;
   late TextEditingController textEditingController;
   late GoogleMapController googleMapController;
-
+  String? sesstionToken;
   late Uuid uuid;
   Set<Marker> markers = {};
 
@@ -40,10 +40,11 @@ class _GoogleMapViewState extends State<GoogleMapView> {
 
   void fetchPredictions() {
     textEditingController.addListener(() async {
-      var sesstionToken = uuid.v4();
+      sesstionToken ??= uuid.v4();
+
       if (textEditingController.text.isNotEmpty) {
         var result = await googleMapsPlacesService.getPredictions(
-            sesstionToken: sesstionToken, input: textEditingController.text);
+            sesstionToken: sesstionToken!, input: textEditingController.text);
 
         places.clear();
         places.addAll(result);
@@ -91,6 +92,7 @@ class _GoogleMapViewState extends State<GoogleMapView> {
                   textEditingController.clear();
                   places.clear();
 
+                  sesstionToken = null;
                   setState(() {});
                 },
                 places: places,

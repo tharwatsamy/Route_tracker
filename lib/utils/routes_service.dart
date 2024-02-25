@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:location/location.dart';
 import 'package:route_tracker/models/location_info/location_info.dart';
 import 'package:route_tracker/models/routes_model/routes_model.dart';
@@ -11,7 +13,7 @@ class RoutesService {
   Future<RoutesModel> fetchRoutes(
       {required LocationInfo origin,
       required LocationInfo destination,
-      RoutesModifiers? routesModifiers}) {
+      RoutesModifiers? routesModifiers}) async {
     Uri url = Uri.parse(baseUrl);
     Map<String, String> headers = {
       'Content-Type': 'application/json',
@@ -31,5 +33,16 @@ class RoutesService {
       "languageCode": "en-US",
       "units": "IMPERIAL"
     };
+
+    var response = await http.post(
+      url,
+      headers: headers,
+      body: body,
+    );
+    if (response.statusCode == 200) {
+      return RoutesModel.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception('No routes found');
+    }
   }
 }

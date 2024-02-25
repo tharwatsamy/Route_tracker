@@ -4,6 +4,7 @@ import 'package:location/location.dart';
 import 'package:route_tracker/models/place_autocomplete_model/place_autocomplete_model.dart';
 import 'package:route_tracker/utils/google_maps_place_service.dart';
 import 'package:route_tracker/utils/location_service.dart';
+import 'package:route_tracker/utils/routes_service.dart';
 import 'package:route_tracker/widgets/custom_list_view.dart';
 import 'package:uuid/uuid.dart';
 
@@ -25,8 +26,11 @@ class _GoogleMapViewState extends State<GoogleMapView> {
   String? sesstionToken;
   late Uuid uuid;
   Set<Marker> markers = {};
-
+  late RoutesService routesService;
   List<PlaceModel> places = [];
+
+  late LatLng currentLocation;
+  late LatLng desintation;
   @override
   void initState() {
     uuid = const Uuid();
@@ -34,6 +38,7 @@ class _GoogleMapViewState extends State<GoogleMapView> {
     textEditingController = TextEditingController();
     initalCameraPoistion = const CameraPosition(target: LatLng(0, 0));
     locationService = LocationService();
+    routesService = RoutesService();
     fetchPredictions();
     super.initState();
   }
@@ -94,6 +99,9 @@ class _GoogleMapViewState extends State<GoogleMapView> {
 
                   sesstionToken = null;
                   setState(() {});
+                  desintation = LatLng(
+                      placeDetailsModel.geometry!.location!.lat!,
+                      placeDetailsModel.geometry!.location!.lng!);
                 },
                 places: places,
                 googleMapsPlacesService: googleMapsPlacesService,
@@ -109,15 +117,14 @@ class _GoogleMapViewState extends State<GoogleMapView> {
     try {
       var locationData = await locationService.getLocation();
 
-      LatLng currentPoistion =
-          LatLng(locationData.latitude!, locationData.longitude!);
+      currentLocation = LatLng(locationData.latitude!, locationData.longitude!);
 
       Marker currentLocationMarker = Marker(
         markerId: const MarkerId('my location'),
-        position: currentPoistion,
+        position: currentLocation,
       );
       CameraPosition myCurrentCameraPoistion = CameraPosition(
-        target: currentPoistion,
+        target: currentLocation,
         zoom: 17,
       );
       googleMapController.animateCamera(

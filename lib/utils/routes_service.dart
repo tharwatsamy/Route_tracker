@@ -37,7 +37,7 @@ class RoutesService {
     var response = await http.post(
       url,
       headers: headers,
-      body: body,
+      body: jsonEncode(body),
     );
     if (response.statusCode == 200) {
       return RoutesModel.fromJson(jsonDecode(response.body));

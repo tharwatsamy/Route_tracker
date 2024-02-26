@@ -34,7 +34,7 @@ class _GoogleMapViewState extends State<GoogleMapView> {
   Set<Marker> markers = {};
   late RoutesService routesService;
   List<PlaceModel> places = [];
-
+  Set<Polyline> polyLines = {};
   late LatLng currentLocation;
   late LatLng desintation;
   @override
@@ -78,6 +78,7 @@ class _GoogleMapViewState extends State<GoogleMapView> {
     return Stack(
       children: [
         GoogleMap(
+          polylines: polyLines,
           markers: markers,
           onMapCreated: (controller) {
             googleMapController = controller;
@@ -99,7 +100,7 @@ class _GoogleMapViewState extends State<GoogleMapView> {
                 height: 16,
               ),
               CustomListView(
-                onPlaceSelect: (placeDetailsModel) {
+                onPlaceSelect: (placeDetailsModel) async {
                   textEditingController.clear();
                   places.clear();
 
@@ -109,7 +110,8 @@ class _GoogleMapViewState extends State<GoogleMapView> {
                       placeDetailsModel.geometry!.location!.lat!,
                       placeDetailsModel.geometry!.location!.lng!);
 
-                  getRouteData();
+                  var points = await getRouteData();
+                  displayRoute(points);
                 },
                 places: places,
                 googleMapsPlacesService: googleMapsPlacesService,
@@ -179,5 +181,17 @@ class _GoogleMapViewState extends State<GoogleMapView> {
     List<LatLng> points =
         result.map((e) => LatLng(e.latitude, e.longitude)).toList();
     return points;
+  }
+
+  void displayRoute(List<LatLng> points) {
+    Polyline route = Polyline(
+      color: Colors.blue,
+      width: 5,
+      polylineId: const PolylineId('route'),
+      points: points,
+    );
+
+    polyLines.add(route);
+    setState(() {});
   }
 }

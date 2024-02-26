@@ -1,13 +1,13 @@
 import 'polyline.dart';
 
-class Route {
+class RouteModel {
   int? distanceMeters;
   String? duration;
   Polyline? polyline;
 
-  Route({this.distanceMeters, this.duration, this.polyline});
+  RouteModel({this.distanceMeters, this.duration, this.polyline});
 
-  factory Route.fromJson(Map<String, dynamic> json) => Route(
+  factory RouteModel.fromJson(Map<String, dynamic> json) => RouteModel(
         distanceMeters: json['distanceMeters'] as int?,
         duration: json['duration'] as String?,
         polyline: json['polyline'] == null

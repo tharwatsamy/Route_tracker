@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
+import 'package:route_tracker/models/location_info/lat_lng.dart';
+import 'package:route_tracker/models/location_info/location.dart';
+import 'package:route_tracker/models/location_info/location_info.dart';
 import 'package:route_tracker/models/place_autocomplete_model/place_autocomplete_model.dart';
+import 'package:route_tracker/models/routes_model/route.dart';
+import 'package:route_tracker/models/routes_model/routes_model.dart';
 import 'package:route_tracker/utils/google_maps_place_service.dart';
 import 'package:route_tracker/utils/location_service.dart';
 import 'package:route_tracker/utils/routes_service.dart';
@@ -102,6 +107,8 @@ class _GoogleMapViewState extends State<GoogleMapView> {
                   desintation = LatLng(
                       placeDetailsModel.geometry!.location!.lat!,
                       placeDetailsModel.geometry!.location!.lng!);
+
+                  getRouteData();
                 },
                 places: places,
                 googleMapsPlacesService: googleMapsPlacesService,
@@ -138,5 +145,25 @@ class _GoogleMapViewState extends State<GoogleMapView> {
     } catch (e) {
       // TODO:
     }
+  }
+
+  Future<RouteModel> getRouteData() async {
+    LocationInfoModel origin = LocationInfoModel(
+      location: LocationModel(
+          latLng: LatLngModel(
+        latitude: currentLocation.latitude,
+        longitude: currentLocation.longitude,
+      )),
+    );
+    LocationInfoModel destination = LocationInfoModel(
+      location: LocationModel(
+          latLng: LatLngModel(
+        latitude: desintation.latitude,
+        longitude: desintation.longitude,
+      )),
+    );
+    RoutesModel routes = await routesService.fetchRoutes(
+        origin: origin, destination: destination);
+    return routes.routes!.first;
   }
 }

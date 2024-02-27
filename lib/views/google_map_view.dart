@@ -61,6 +61,8 @@ class _GoogleMapViewState extends State<GoogleMapView> {
 
         places.clear();
         places.addAll(result);
+
+        var newList = places;
         setState(() {});
       } else {
         places.clear();

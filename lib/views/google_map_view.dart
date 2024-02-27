@@ -10,6 +10,7 @@ import 'package:route_tracker/models/location_info/location_info.dart';
 import 'package:route_tracker/models/place_autocomplete_model/place_autocomplete_model.dart';
 import 'package:route_tracker/models/routes_model/route.dart';
 import 'package:route_tracker/models/routes_model/routes_model.dart';
+import 'package:route_tracker/utils/Map_services.dart';
 import 'package:route_tracker/utils/google_maps_place_service.dart';
 import 'package:route_tracker/utils/location_service.dart';
 import 'package:route_tracker/utils/routes_service.dart';
@@ -27,26 +28,24 @@ class GoogleMapView extends StatefulWidget {
 
 class _GoogleMapViewState extends State<GoogleMapView> {
   late CameraPosition initalCameraPoistion;
-  late PlacesService placesService;
-  late LocationService locationService;
+
+  late MapServices mapServices;
   late TextEditingController textEditingController;
   late GoogleMapController googleMapController;
   String? sesstionToken;
   late Uuid uuid;
   Set<Marker> markers = {};
-  late RoutesService routesService;
+
   List<PlaceModel> places = [];
   Set<Polyline> polyLines = {};
   late LatLng currentLocation;
   late LatLng desintation;
   @override
   void initState() {
+    mapServices = MapServices();
     uuid = const Uuid();
-    placesService = PlacesService();
     textEditingController = TextEditingController();
     initalCameraPoistion = const CameraPosition(target: LatLng(0, 0));
-    locationService = LocationService();
-    routesService = RoutesService();
     fetchPredictions();
     super.initState();
   }
@@ -54,20 +53,11 @@ class _GoogleMapViewState extends State<GoogleMapView> {
   void fetchPredictions() {
     textEditingController.addListener(() async {
       sesstionToken ??= uuid.v4();
-
-      if (textEditingController.text.isNotEmpty) {
-        var result = await placesService.getPredictions(
-            sesstionToken: sesstionToken!, input: textEditingController.text);
-
-        places.clear();
-        places.addAll(result);
-
-        var newList = places;
-        setState(() {});
-      } else {
-        places.clear();
-        setState(() {});
-      }
+      await mapServices.getPredictions(
+          input: textEditingController.text,
+          sesstionToken: sesstionToken!,
+          places: places);
+      setState(() {});
     });
   }
 
@@ -114,11 +104,16 @@ class _GoogleMapViewState extends State<GoogleMapView> {
                       placeDetailsModel.geometry!.location!.lat!,
                       placeDetailsModel.geometry!.location!.lng!);
 
-                  var points = await getRouteData();
-                  displayRoute(points);
+                  var points = await mapServices.getRouteData(
+                      currentLocation: currentLocation,
+                      desintation: desintation);
+                  mapServices.displayRoute(points,
+                      polyLines: polyLines,
+                      googleMapController: googleMapController);
+                  setState(() {});
                 },
                 places: places,
-                googleMapsPlacesService: placesService,
+                mapServices: mapServices,
               )
             ],
           ),
@@ -129,21 +124,8 @@ class _GoogleMapViewState extends State<GoogleMapView> {
 
   void updateCurrentLocation() async {
     try {
-      var locationData = await locationService.getLocation();
-
-      currentLocation = LatLng(locationData.latitude!, locationData.longitude!);
-
-      Marker currentLocationMarker = Marker(
-        markerId: const MarkerId('my location'),
-        position: currentLocation,
-      );
-      CameraPosition myCurrentCameraPoistion = CameraPosition(
-        target: currentLocation,
-        zoom: 17,
-      );
-      googleMapController.animateCamera(
-          CameraUpdate.newCameraPosition(myCurrentCameraPoistion));
-      markers.add(currentLocationMarker);
+      currentLocation = await mapServices.updateCurrentLocation(
+          googleMapController: googleMapController, markers: markers);
       setState(() {});
     } on LocationServiceException catch (e) {
       // TODO:
@@ -153,71 +135,4 @@ class _GoogleMapViewState extends State<GoogleMapView> {
       // TODO:
     }
   }
-
-  Future<List<LatLng>> getRouteData() async {
-    LocationInfoModel origin = LocationInfoModel(
-      location: LocationModel(
-          latLng: LatLngModel(
-        latitude: currentLocation.latitude,
-        longitude: currentLocation.longitude,
-      )),
-    );
-    LocationInfoModel destination = LocationInfoModel(
-      location: LocationModel(
-          latLng: LatLngModel(
-        latitude: desintation.latitude,
-        longitude: desintation.longitude,
-      )),
-    );
-    RoutesModel routes = await routesService.fetchRoutes(
-        origin: origin, destination: destination);
-    PolylinePoints polylinePoints = PolylinePoints();
-    List<LatLng> points = getDecodedRoute(polylinePoints, routes);
-    return points;
-  }
-
-  List<LatLng> getDecodedRoute(
-      PolylinePoints polylinePoints, RoutesModel routes) {
-    List<PointLatLng> result = polylinePoints.decodePolyline(
-      routes.routes!.first.polyline!.encodedPolyline!,
-    );
-
-    List<LatLng> points =
-        result.map((e) => LatLng(e.latitude, e.longitude)).toList();
-    return points;
-  }
-
-  void displayRoute(List<LatLng> points) {
-    Polyline route = Polyline(
-      color: Colors.blue,
-      width: 5,
-      polylineId: const PolylineId('route'),
-      points: points,
-    );
-
-    polyLines.add(route);
-
-    LatLngBounds bounds = getLatLngBounds(points);
-    googleMapController.animateCamera(CameraUpdate.newLatLngBounds(bounds, 32));
-    setState(() {});
-  }
-
-  LatLngBounds getLatLngBounds(List<LatLng> points) {
-    var southWestLatitude = points.first.latitude;
-    var southWestLongitude = points.first.longitude;
-    var northEastLatitude = points.first.latitude;
-    var northEastLongitude = points.first.longitude;
-
-    for (var point in points) {
-      southWestLatitude = min(southWestLatitude, point.latitude);
-      southWestLongitude = min(southWestLongitude, point.longitude);
-      northEastLatitude = max(northEastLatitude, point.latitude);
-      northEastLongitude = max(northEastLongitude, point.longitude);
-    }
-
-    return LatLngBounds(
-        southwest: LatLng(southWestLatitude, southWestLongitude),
-        northeast: LatLng(northEastLatitude, northEastLongitude));
-  }
 }
-// point.lat 

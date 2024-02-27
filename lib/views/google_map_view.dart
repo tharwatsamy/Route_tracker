@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -40,6 +41,8 @@ class _GoogleMapViewState extends State<GoogleMapView> {
   Set<Polyline> polyLines = {};
   late LatLng currentLocation;
   late LatLng desintation;
+
+  Timer? debounce;
   @override
   void initState() {
     mapServices = MapServices();
@@ -51,19 +54,25 @@ class _GoogleMapViewState extends State<GoogleMapView> {
   }
 
   void fetchPredictions() {
-    textEditingController.addListener(() async {
-      sesstionToken ??= uuid.v4();
-      await mapServices.getPredictions(
-          input: textEditingController.text,
-          sesstionToken: sesstionToken!,
-          places: places);
-      setState(() {});
+    textEditingController.addListener(() {
+      if (debounce?.isActive ?? false) {
+        debounce?.cancel();
+      }
+      debounce = Timer(const Duration(milliseconds: 100), () async {
+        sesstionToken ??= uuid.v4();
+        await mapServices.getPredictions(
+            input: textEditingController.text,
+            sesstionToken: sesstionToken!,
+            places: places);
+        setState(() {});
+      });
     });
   }
 
   @override
   void dispose() {
     textEditingController.dispose();
+    debounce?.cancel();
     super.dispose();
   }
 

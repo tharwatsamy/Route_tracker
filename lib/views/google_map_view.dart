@@ -39,7 +39,7 @@ class _GoogleMapViewState extends State<GoogleMapView> {
 
   List<PlaceModel> places = [];
   Set<Polyline> polyLines = {};
-  late LatLng currentLocation;
+
   late LatLng desintation;
 
   Timer? debounce;
@@ -113,9 +113,8 @@ class _GoogleMapViewState extends State<GoogleMapView> {
                       placeDetailsModel.geometry!.location!.lat!,
                       placeDetailsModel.geometry!.location!.lng!);
 
-                  var points = await mapServices.getRouteData(
-                      currentLocation: currentLocation,
-                      desintation: desintation);
+                  var points =
+                      await mapServices.getRouteData(desintation: desintation);
                   mapServices.displayRoute(points,
                       polyLines: polyLines,
                       googleMapController: googleMapController);
@@ -131,11 +130,14 @@ class _GoogleMapViewState extends State<GoogleMapView> {
     );
   }
 
-  void updateCurrentLocation() async {
+  void updateCurrentLocation() {
     try {
-      currentLocation = await mapServices.updateCurrentLocation(
-          googleMapController: googleMapController, markers: markers);
-      setState(() {});
+      mapServices.updateCurrentLocation(
+          onUpdatecurrentLocation: () {
+            setState(() {});
+          },
+          googleMapController: googleMapController,
+          markers: markers);
     } on LocationServiceException catch (e) {
       // TODO:
     } on LocationPermissionException catch (e) {
